@@ -10,6 +10,7 @@ class DummyArgs(object):
     force_rows = {}
     children = 25
     buffer = 1000
+    exclude_tables = []
 
 dummy_args = DummyArgs()
 
