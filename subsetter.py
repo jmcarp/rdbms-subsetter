@@ -152,7 +152,7 @@ def _pk_val(self, row):
 def _by_pk(self, pk):
     pk_name = self.db.inspector.get_primary_keys(self.name,
                                                  self.schema)[0]
-    slct = self.filtered_by(pk_name=pk)
+    slct = self.filtered_by(**{pk_name: pk})
     return self.db.conn.execute(slct).fetchone()
 
 def _completeness_score(self):
