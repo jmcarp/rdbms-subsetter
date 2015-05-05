@@ -58,6 +58,7 @@ supported).
 Case-specific table names will probably create bad results in rdbms-subsetter,
 and in the rest of your life, for that matter.  Don't do it.
 """
+import json
 import argparse
 import functools
 import logging
@@ -192,7 +193,8 @@ class Db(object):
             tbl.find_n_rows(estimate=True)
             self.tables[(tbl.schema, tbl.name)] = tbl
         for ((tbl_schema, tbl_name), tbl) in self.tables.items():
-            for fk in tbl.fks:
+            constraints = args.config.get('constraints', {}).get(tbl_name, [])
+            for fk in (tbl.fks + constraints):
                 fk['constrained_schema'] = tbl_schema
                 fk['constrained_table'] = tbl_name  # TODO: check against constrained_table
                 self.tables[(fk['referred_schema'], fk['referred_table'])].child_fks.append(fk)
@@ -406,6 +408,8 @@ argparser.add_argument('--schema', help='Non-default schema to include',
                        type=str, action='append', default=[])
 argparser.add_argument('--exclude-table', '-T', dest='exclude_tables', help='Tables to exclude',
                        type=str, action='append', default=[])
+argparser.add_argument('--config', help='Path to configuration .json file',
+                       type=argparse.FileType('r'))
 argparser.add_argument('-y', '--yes', help='Proceed without stopping for confirmation', action='store_true')
 
 def generate():
@@ -418,6 +422,7 @@ def generate():
         args.force_rows[table_name].append(pk)
     logging.getLogger().setLevel(args.loglevel)
     schemas = args.schema + [None,]
+    args.config = json.load(args.config) if args.config else {}
     for schema in schemas:
         source = Db(args.source, args, schema=schema)
         target = Db(args.dest, args, schema=schema)

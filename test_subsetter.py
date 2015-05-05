@@ -11,6 +11,7 @@ class DummyArgs(object):
     children = 25
     buffer = 1000
     exclude_tables = []
+    config = {}
 
 dummy_args = DummyArgs()
 
